@@ -1,0 +1,155 @@
+# Heimdall优化器配置文件
+
+# LLM配置
+llm:
+  # 提供商: openai | local | anthropic
+  provider: openai
+
+  # API配置
+  api_key: ${OPENAI_API_KEY}  # 从环境变量读取
+  api_endpoint: https://api.openai.com/v1
+
+  # 本地模型配置（如果使用local provider）
+  local_endpoint: http://localhost:8000/generate
+
+  # 生成参数
+  generation:
+    model_name: gpt-4
+    temperature: 0.3
+    max_tokens: 2000
+    num_candidates: 3
+    timeout_seconds: 60
+
+  # 缓存配置
+  cache:
+    enabled: true
+    max_size: 1000
+    ttl_seconds: 3600
+
+# 验证器配置
+validator:
+  # 验证模式: strict | relaxed | heuristic
+  mode: strict
+
+  # 超时设置
+  timeout_seconds: 10
+
+  # 启用的规则
+  rules:
+    - commutative_join
+    - associative_join
+    - subquery_unnesting
+    - predicate_pushdown
+    - in_expression_expansion
+
+  # 验证阈值
+  confidence_threshold: 0.95
+
+# 优化策略
+optimization:
+  # 启用优化器
+  enabled: true
+
+  # 触发条件
+  triggers:
+    enable_for_subqueries: true
+    enable_for_complex_joins: true
+    min_estimated_cost: 1000
+    min_table_count: 2
+
+  # 生成策略
+  generation:
+    max_candidates: 5
+    validation_timeout_sec: 10.0
+
+  # 选择模式: best_cost | first_valid | conservative
+  selection_mode: best_cost
+
+  # 最小改进比率（例如1.2表示需要至少20%的改进）
+  min_improvement_ratio: 1.2
+
+  # 代价估算
+  cost_estimation:
+    use_txsql_cost_model: true
+    fallback_to_heuristic: true
+
+# Prompt配置
+prompt:
+  # 使用few-shot示例
+  use_few_shot: true
+  max_few_shot_examples: 3
+
+  # 优化提示
+  optimization_hints:
+    - subquery_unnesting
+    - predicate_pushdown
+    - join_reordering
+    - redundancy_elimination
+
+  # 优化目标: performance | readability | balanced
+  optimization_goal: performance
+
+# 监控和日志
+monitoring:
+  # 启用统计收集
+  enable_statistics: true
+
+  # 日志级别: debug | info | warning | error
+  log_level: info
+
+  # 日志文件路径
+  log_file: /var/log/heimdall/optimizer.log
+
+  # 性能监控
+  metrics:
+    enabled: true
+    export_interval_seconds: 60
+    export_path: /var/log/heimdall/metrics.json
+
+# 测试和调试
+debug:
+  # 调试模式
+  enabled: false
+
+  # 保存中间结果
+  save_intermediate_results: false
+  output_directory: ./heimdall_debug
+
+  # 详细日志
+  verbose_logging: false
+
+  # 打印所有候选SQL
+  print_all_candidates: false
+
+# TPC-DS基准测试
+benchmark:
+  # 数据集路径
+  tpcds_data_path: ./data/tpcds
+
+  # 规模因子: 1GB | 10GB | 100GB
+  scale_factor: 1GB
+
+  # 目标查询
+  target_queries:
+    - q77
+    - q80
+    - q87
+    - q19
+    - q37
+
+  # 重复次数
+  num_runs: 3
+
+  # 结果输出
+  results_path: ./data/results
+
+# TXSQL集成
+txsql:
+  # 集成模式: plugin | hook
+  integration_mode: hook
+
+  # 优化器Pass优先级
+  optimizer_pass_priority: 100
+
+  # 注册时机: startup | first_query
+  registration_timing: startup
